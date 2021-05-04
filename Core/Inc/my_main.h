@@ -11,10 +11,10 @@
 #include "main.h"
 #include "my_serial.h"
 
-#define GREEN_LED 	LD4_Pin
+#define GREEN_LED   LD4_Pin
 #define ORANGE_LED 	LD3_Pin
-#define RED_LED 	LD5_Pin
-#define BLUE_LED 	LD6_Pin
+#define RED_LED     LD5_Pin
+#define BLUE_LED    LD6_Pin
 
 //void fvdWrapBuffer()
 

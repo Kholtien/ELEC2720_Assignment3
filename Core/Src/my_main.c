@@ -23,7 +23,7 @@ void fvdMyMain(UART_HandleTypeDef *pstHuart2)
         if((uint8_t)chRxChar != 255){
             fuinPutChar(pstSerialChannel2, chRxChar, BLOCKING);
         }
-
+    HAL_Delay(250);
     }
 
 }
