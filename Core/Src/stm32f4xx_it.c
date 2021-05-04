@@ -22,6 +22,7 @@
 #include "main.h"
 #include "stm32f4xx_it.h"
 #include "my_main.h"
+#include "my_serial.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -58,7 +59,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart2;
-extern stSERIAL_CHANNELTypeDef *pstSerialChannel2;
+extern stSERIAL_CHANNELTypeDef * pstSerialChannel2;
 extern void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh);
 extern uint8_t rec_data[4];
 
@@ -211,13 +212,13 @@ void USART2_IRQHandler(void)
 {
 	fvdSerialChannelISR(pstSerialChannel2);
 //  HAL_UART_IRQHandler(&huart2);
-  HAL_GPIO_TogglePin(LD6_GPIO_Port,LD6_Pin); //Blue LED
-
-  if (huart2.RxXferCount == 0)
-  {
- 	HAL_UART_Receive_IT(&huart2,rec_data,4); //Reset the buffers, enable Rx  interrupt
- 	HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin); // Pulse Orange LED
-  }
+//  HAL_GPIO_TogglePin(LD6_GPIO_Port,LD6_Pin); //Blue LED
+//
+//  if (huart2.RxXferCount == 0)
+//  {
+// 	HAL_UART_Receive_IT(&huart2,rec_data,4); //Reset the buffers, enable Rx  interrupt
+// 	HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin); // Pulse Orange LED
+//  }
 }
 
 /* USER CODE BEGIN 1 */

@@ -6,11 +6,13 @@
  */
 #include "my_main.h"
 
+stSERIAL_CHANNELTypeDef *pstSerialChannel2;
+uint8_t data[] = "Hello Cruel World\n";
 
 void fvdMyMain(UART_HandleTypeDef *pstHuart2)
 {
     char chRxChar;
-    stSERIAL_CHANNELTypeDef *pstSerialChannel2;
+
     pstSerialChannel2 = pstCreateSerialChannel(pstHuart2, RX_BUFFER_SIZE, TX_BUFFER_SIZE);
 
     fvdEnableSerialChInterupts(pstSerialChannel2);
@@ -24,6 +26,7 @@ void fvdMyMain(UART_HandleTypeDef *pstHuart2)
             fuinPutChar(pstSerialChannel2, chRxChar, BLOCKING);
         }
     HAL_Delay(250);
+    HAL_GPIO_TogglePin(GPIOD, GREEN_LED);
     }
 
 }

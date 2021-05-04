@@ -43,8 +43,8 @@
 UART_HandleTypeDef huart2;
 
 //Private data structures
-uint8_t data[] = "Hello Cruel World\n";
-uint8_t rec_data[4];
+//uint8_t data[] = "Hello Cruel World\n";
+//uint8_t rec_data[4];
 
 /* USER CODE BEGIN PV */
 
@@ -99,13 +99,13 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   fvdMyMain(&huart2);
-  HAL_UART_Receive_IT(&huart2,rec_data,4);
+//  HAL_UART_Receive_IT(&huart2,rec_data,4);
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_UART_Transmit(&huart2,data,sizeof(data),100);
-	  HAL_Delay(500);
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);// Green LED
+//	  HAL_UART_Transmit(&huart2,data,sizeof(data),100);
+//	  HAL_Delay(500);
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);// Green LED
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

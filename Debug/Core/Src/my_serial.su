@@ -1,0 +1,5 @@
+my_serial.c:69:27:pstCreateSerialChannel	40	static
+my_serial.c:167:6:fvdEnableSerialChInterupts	16	static
+my_serial.c:180:6:fchGetChar	24	static
+my_serial.c:225:9:fuinPutChar	24	static
+my_serial.c:278:6:fvdSerialChannelISR	32	static

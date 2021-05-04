@@ -37,17 +37,17 @@ enum BOOL { False , True };
 # define DISABLE_RXNE_INT ( RX_CHANNEL ) CLEAR_BIT (( RX_CHANNEL -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_RXNEIE )
 // disable the TX interrupt
 # define DISABLE_TXE_INT ( TX_CHANNEL ) CLEAR_BIT (( TX_CHANNEL - > pstUartHALHandle -> Instance - > CR1 ) , USART_CR1_TXEIE )
-# define CTRLS 0 x13 // The Control S ascii character -- STOP transmission
-# define CTRLQ 0 x11 // The Control Q ascii character -- START transmission
+# define CTRLS 0x13 // The Control S ascii character -- STOP transmission
+# define CTRLQ 0x11 // The Control Q ascii character -- START transmission
 # define NULL_CHAR ’\0 ’ // Used to indicate the end of strings .
 # define BLOCKING True // Blocking call to serial routine
 # define NON_BLOCKING False // Non - blocking call to serial routine
 // Set up the bits used to check for serial transmission errors
 // Actually defined in the auto generated HAL code
-# define UART_OVERRUN_ERR ((0 x01U ) << 3) // The bit that indicates an overrun error .
-# define UART_NOISE_ERR ((0 x01U ) << 2) // Noise glitch detected error .
-# define UART_FRAMING_ERR ((0 x01U ) << 1) // Framing error .
-# define UART_PARITY_ERR ((0 x01U ) << 0) // Parity error
+# define UART_OVERRUN_ERR ((0x01U ) << 3) // The bit that indicates an overrun error .
+# define UART_NOISE_ERR ((0x01U ) << 2) // Noise glitch detected error .
+# define UART_FRAMING_ERR ((0x01U ) << 1) // Framing error .
+# define UART_PARITY_ERR ((0x01U ) << 0) // Parity error
 
 
 
@@ -108,6 +108,7 @@ stSERIAL_CHANNELTypeDef * pstCreateSerialChannel(UART_HandleTypeDef *pstHuart2, 
 
 void fvdEnableSerialChInterupts(stSERIAL_CHANNELTypeDef * pstSERIAL_CHANNEL);
 char fchGetChar(stSERIAL_CHANNELTypeDef *pstSerialCh, enum BOOL boBlocking);
+uint8_t fuinPutChar(stSERIAL_CHANNELTypeDef *pstSerialCh, char chChar, enum BOOL boBlocking);
 void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh);
 
 
