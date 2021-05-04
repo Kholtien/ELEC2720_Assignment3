@@ -115,14 +115,8 @@ enum BOOL fboPrintStr(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, enu
 
 uint16_t fuinRecievedChars(stSERIAL_CHANNELTypeDef *pstSerialCh);//done
 
-uint16_t fuinGetAllChars(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, uint16_t uinMaxStringSize);
+uint16_t fuinGetAllChars(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, uint16_t uinMaxStringSize);//done
 
 void fvdRxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh);//TODO
-
-uint16_t fuinGetAllChars(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, uint16_t uinMaxStringSize);//TODO
-
-uint16_t fuinReceivedChars(stSERIAL_CHANNELTypeDef* pstSerialCh);//TODO
-
-enum BOOL fboPrintString(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, enum BOOL boBlocking);//TODO
 
 #endif /* INC_MY_SERIAL_H_ */
