@@ -333,6 +333,61 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 
 }
 
+void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
+{
+	//entry
+
+	//send Ctrl S or Q?
+	if((pstSerialCh->pstRxChannel->chCtrlSCtrlQ == CTRLS) || (pstSerialCh->pstRxChannel->chCtrlSCtrlQ == CTRLQ)){
+		//if yes
+			//txDR = CTRL S or CTRL Q
+		pstSerialCh->pstTxChannel->pstUartHALHandle->Instance->DR = pstSerialCh->pstRxChannel->chCtrlSCtrlQ;
+
+		//RESET CTRLS/Q loc = 0
+
+		//ORANGE LED on for CTRLS and Off for CTRLQ
+		if(pstSerialCh->pstRxChannel->chCtrlSCtrlQ == CTRLS){
+			HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_SET);
+		}
+		else if(pstSerialCh->pstRxChannel->chCtrlSCtrlQ == CTRLQ){
+			HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_RESET);
+		}
+
+		pstSerialCh->pstRxChannel->chCtrlSCtrlQ = 0;
+
+		//return
+		return;
+	}
+	//if no
+		//is TxBuf Used == 0?
+	if(pstSerialCh->pstTxChannel->uinUsed == 0){
+			//if yes
+				//disable Tx Int
+//		DISABLE_TXE_INT(pstSerialCh->pstTxChannel);
+		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+		return;
+	}
+			//if no
+				//is User CTRLS flag == true?
+	if(pstSerialCh->pstTxChannel->boTxUserCtrlS){
+					//if yes
+						//disable Tx Int
+		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+		return;
+	}
+					//if no
+						//TXDR <-- TBuf[tail];
+	pstSerialCh->pstTxChannel->pstUartHALHandle->Instance->DR = (uint8_t)((pstSerialCh->pstTxChannel->pchSerialBuffer[pstSerialCh->pstTxChannel->uinTail]) & 0x7FU);
+						//tail++
+						//check for wrap
+	pstSerialCh->pstTxChannel->uinTail = (pstSerialCh->pstTxChannel->uinTail + 1) % (pstSerialCh->pstTxChannel->uinBufSize);
+						//free++
+	pstSerialCh->pstTxChannel->uinFree++;
+						//used--
+	pstSerialCh->pstTxChannel->uinUsed--;
+						//return
+	return;
+}
 
 
 //stSERIAL_CHANNELTypeDef *pstSerialChannel2;
