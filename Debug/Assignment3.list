@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00020070  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0000a289  00000000  00000000  000200a0  2**0
+ 12 .debug_info   0000a395  00000000  00000000  000200a0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 000019a4  00000000  00000000  0002a329  2**0
+ 13 .debug_abbrev 000019e0  00000000  00000000  0002a435  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000690  00000000  00000000  0002bcd0  2**3
+ 14 .debug_aranges 000006b0  00000000  00000000  0002be18  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 000005f8  00000000  00000000  0002c360  2**3
+ 15 .debug_ranges 00000618  00000000  00000000  0002c4c8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00020a6a  00000000  00000000  0002c958  2**0
+ 16 .debug_macro  00020ad0  00000000  00000000  0002cae0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   000080de  00000000  00000000  0004d3c2  2**0
+ 17 .debug_line   0000827e  00000000  00000000  0004d5b0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000c317f  00000000  00000000  000554a0  2**0
+ 18 .debug_str    000c325f  00000000  00000000  0005582e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  0011861f  2**0
+ 19 .comment      00000053  00000000  00000000  00118a8d  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00001ae4  00000000  00000000  00118674  2**2
+ 20 .debug_frame  00001b7c  00000000  00000000  00118ae0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1337,8 +1337,8 @@ stSERIAL_CHANNELTypeDef * pstCreateSerialChannel(UART_HandleTypeDef *pstHuart2, 
  8000a56:	f000 fe05 	bl	8001664 <HAL_GPIO_WritePin>
 
 	//Turn on Orange LED to indicate Tx Buffer overflow
-	HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_SET);
- 8000a5a:	2201      	movs	r2, #1
+	HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_RESET);
+ 8000a5a:	2200      	movs	r2, #0
  8000a5c:	f44f 5100 	mov.w	r1, #8192	; 0x2000
  8000a60:	4803      	ldr	r0, [pc, #12]	; (8000a70 <pstCreateSerialChannel+0x140>)
  8000a62:	f000 fdff 	bl	8001664 <HAL_GPIO_WritePin>
@@ -1355,8 +1355,9 @@ stSERIAL_CHANNELTypeDef * pstCreateSerialChannel(UART_HandleTypeDef *pstHuart2, 
  8000a70:	40020c00 	.word	0x40020c00
 
 08000a74 <fvdEnableSerialChInterupts>:
-//function defines end
-
+* channel -- i.e. it enables RX and TX for the particular
+* interrupt , and globally enables interrupts in the NVIC .
+*/
 
 void fvdEnableSerialChInterupts(stSERIAL_CHANNELTypeDef * pstSERIAL_CHANNEL)
 {

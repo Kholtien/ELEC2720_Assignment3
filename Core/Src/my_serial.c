@@ -9,6 +9,7 @@
 #include "my_main.h"
 #include "main.h"
 #include <stdio.h>// Added
+#include <string.h>
 #include <stdlib.h>
 
 
@@ -163,6 +164,14 @@ stSERIAL_CHANNELTypeDef * pstCreateSerialChannel(UART_HandleTypeDef *pstHuart2, 
 }
 //function defines end
 
+/*
+* void fvdEnableSerialChInterrupts ( stSERIAL_CHANNELTypeDef * pstSerialCh )
+* --------------------------------------------------------
+*
+* This function enables all of the interrupts for a serial
+* channel -- i.e. it enables RX and TX for the particular
+* interrupt , and globally enables interrupts in the NVIC .
+*/
 
 void fvdEnableSerialChInterupts(stSERIAL_CHANNELTypeDef * pstSERIAL_CHANNEL)
 {
@@ -389,5 +398,53 @@ void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
 	return;
 }
 
+//returns true if successful and false if failed
+enum BOOL fboPrintStr(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, enum BOOL boBlocking)
+{
+	uint16_t uinStringIndex = 0;
 
+	//if non blocking
+	if(boBlocking == NON_BLOCKING){
+		//if the length of the string is less than or equal to the number of free space in the Tx Channel
+		if(strlen(pchString) <= pstSerialCh->pstTxChannel->uinFree){
+			while(pchString[uinStringIndex] != '\0'){
+				fuinPutChar(pstSerialCh, pchString[uinStringIndex], NON_BLOCKING);
+				uinStringIndex++;
+			}
+			return True;
+		}
+		else {
+			return False;
+		}
+	}
+	//if non Blocking
+	else{
+		return False;
+	}
+}
+
+//returns the number of characters in the receive buffer
+uint16_t fuinRecievedChars(stSERIAL_CHANNELTypeDef *pstSerialCh)
+{
+	return pstSerialCh->pstRxChannel->uinUsed;
+}
+
+//Returns the length of the string
+uint16_t fuinGetAllChars(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, uint16_t uinMaxStringSize)
+{
+	uint16_t uinStringIndex = 0;
+
+	while (uinStringIndex < uinMaxStringSize){
+		pchString[uinStringIndex] = fchGetChar(pstSerialCh, NON_BLOCKING);
+		if(pchString[uinStringIndex] == 255){
+			pchString[uinStringIndex] = '\0';
+			return uinStringIndex;
+		}
+		uinStringIndex++;
+	}
+
+	pchString[uinStringIndex] = '\0';
+
+	return uinStringIndex;
+}
 //stSERIAL_CHANNELTypeDef *pstSerialChannel2;
