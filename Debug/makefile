@@ -61,8 +61,8 @@ all: main-build
 main-build: Assignment3.elf secondary-outputs
 
 # Tool invocations
-Assignment3.elf: $(OBJS) $(USER_OBJS) U:\2021\ELEC2720\ELEC2720_Assignment3\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Assignment3.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"U:\2021\ELEC2720\ELEC2720_Assignment3\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Assignment3.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Assignment3.elf: $(OBJS) $(USER_OBJS) U:\2021\ELEC2720\test\ELEC2720_Assignment3\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Assignment3.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"U:\2021\ELEC2720\test\ELEC2720_Assignment3\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Assignment3.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

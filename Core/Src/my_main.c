@@ -25,8 +25,8 @@ void fvdMyMain(UART_HandleTypeDef *pstHuart2)
         if((uint8_t)chRxChar != 255){
             fuinPutChar(pstSerialChannel2, chRxChar, BLOCKING);
         }
-    HAL_Delay(250);
-    HAL_GPIO_TogglePin(GPIOD, GREEN_LED);
+//    HAL_Delay(250);
+//    HAL_GPIO_TogglePin(GPIOD, GREEN_LED);
     }
 
 }

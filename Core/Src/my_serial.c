@@ -16,57 +16,6 @@
 
 
 
-
-
-
-//function defines begin
-//stRX_SERIAL_CHANNELTypeDef * pstCreatestRX_SERIAL_CHANNELTypeDef(UART_HandleTypeDef* pstHuart2,uint16_t rx_Buffer_Size)
-//{
-//	stRX_SERIAL_CHANNELTypeDef * rx_channel;
-//	int8_t * pchSerialBuffer = malloc(rx_Buffer_Size);
-//
-//	for(int i = 0; i <= rx_Buffer_Size; i++){
-//		pchSerialBuffer[i] = 0;
-//	}
-//
-//	rx_channel->pstUartHALHandle   = pstHuart2;
-//	rx_channel->uinHead            = 0;
-//	rx_channel->uinTail            = 0;
-//	rx_channel->uinFree            = rx_Buffer_Size;
-//	rx_channel->uinUsed            = 0;
-//	rx_channel->uinBufSize         = rx_Buffer_Size;
-//	rx_channel->chCtrlSCtrlQ       = 0;
-//	rx_channel->boHysteresisActive = False;
-//	rx_channel->uinCtrlSThreshold  = 0;
-//	rx_channel->uinCtrlQThreshold  = 0;
-//	rx_channel->boOverflowErr      = 0;
-//	rx_channel->boParityErr        = 0;
-//	rx_channel->pchSerialBuffer    = pchSerialBuffer;
-//
-//	return rx_channel;
-//}
-
-//stTX_SERIAL_CHANNELTypeDef * pstCreatestTX_SERIAL_CHANNELTypeDef(UART_HandleTypeDef *pstHuart2, uint16_t tx_Buffer_Size)
-//{
-//	stTX_SERIAL_CHANNELTypeDef * tx_channel;
-//	int8_t *pchSerialBuffer = malloc(tx_Buffer_Size);
-//	for(int i = 0; i <= tx_Buffer_Size; i++){
-//		pchSerialBuffer[i] = 0;
-//	}
-//
-//	tx_channel->pstUartHALHandle 	= pstHuart2;
-//	tx_channel->uinHead 			= 0;
-//	tx_channel->uinTail 			= 0;
-//	tx_channel->uinFree 			= tx_Buffer_Size;
-//	tx_channel->uinUsed 			= 0;
-//	tx_channel->uinBufSize 			= tx_Buffer_Size;
-//	tx_channel->boTxUserCtrlS 		= False;
-//	tx_channel->pchSerialBuffer 	= pchSerialBuffer;
-//
-//	return tx_channel;
-//}
-
-
 stSERIAL_CHANNELTypeDef * pstCreateSerialChannel(UART_HandleTypeDef *pstHuart2, uint16_t rx_Buffer_Size, uint16_t tx_Buffer_Size)
 {
 	int8_t * pinRxBufTemp;
@@ -176,8 +125,8 @@ stSERIAL_CHANNELTypeDef * pstCreateSerialChannel(UART_HandleTypeDef *pstHuart2, 
 void fvdEnableSerialChInterupts(stSERIAL_CHANNELTypeDef * pstSERIAL_CHANNEL)
 {
 	//Enable Rx Not Empty Interrupt
-//	ENABLE_RXNE_INT(pstSERIAL_CHANNEL->pstRxChannel);
-	SET_BIT( (pstSERIAL_CHANNEL->pstRxChannel->pstUartHALHandle->Instance->CR1), USART_CR1_RXNEIE );
+	ENABLE_RXNE_INT(pstSERIAL_CHANNEL->pstRxChannel);
+//	SET_BIT( (pstSERIAL_CHANNEL->pstRxChannel->pstUartHALHandle->Instance->CR1), USART_CR1_RXNEIE );
 	// Enable TX empty interrupt
 	// SET_BIT ( pstSerialCh -> pstTxChannel - > pstUartHALHandle -> Instance - >CR1 , USART_CR1_TXEIE );
 	// ENABLE_TXE_INT ( pstSerialCh -> pstTxChannel -> pstUartHALHandle -> Instance -> CR1);
@@ -212,7 +161,7 @@ char fchGetChar(stSERIAL_CHANNELTypeDef *pstSerialCh, enum BOOL boBlocking)
 	pstSerialCh->pstRxChannel->uinTail = (pstSerialCh->pstRxChannel->uinTail + 1) % (pstSerialCh->pstRxChannel->uinBufSize);
 
 	pstSerialCh->pstRxChannel->uinFree++;
-	pstSerialCh->pstRxChannel->uinUsed++;
+	pstSerialCh->pstRxChannel->uinUsed--;
 
 	//is hysteresis active and Rx Used <= Ctrl Q treshold?
 	if(pstSerialCh->pstRxChannel->boHysteresisActive && (pstSerialCh->pstRxChannel->uinUsed) <= pstSerialCh->pstRxChannel->uinCtrlQThreshold){
@@ -223,7 +172,8 @@ char fchGetChar(stSERIAL_CHANNELTypeDef *pstSerialCh, enum BOOL boBlocking)
 		pstSerialCh->pstRxChannel->boHysteresisActive = False;
 
 		//Enable Tx Interrupts
-		SET_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) ,USART_CR1_TXEIE );
+//		SET_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) ,USART_CR1_TXEIE );
+		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
 	}
 
 	HAL_NVIC_EnableIRQ(pstSerialCh->uinIRQn);
@@ -238,7 +188,7 @@ uint8_t fuinPutChar(stSERIAL_CHANNELTypeDef *pstSerialCh, char chChar, enum BOOL
 	uinFreeLoc = pstSerialCh->pstTxChannel->uinFree;
 
 	//is TxBuff.free == 0 and Blocking == false?
-	if(uinFreeLoc == 0 && !boBlocking){
+	if((uinFreeLoc == 0) && !boBlocking){
 		//if yes
 		return uinFreeLoc;
 	}
@@ -272,10 +222,12 @@ uint8_t fuinPutChar(stSERIAL_CHANNELTypeDef *pstSerialCh, char chChar, enum BOOL
 	//free--
 	pstSerialCh->pstTxChannel->uinFree--;
 
+	uinFreeLoc = pstSerialCh->pstTxChannel->uinFree;
 	//is user CtrlS == True?
 	if(!(pstSerialCh->pstTxChannel->boTxUserCtrlS)){
 		//Enable Tx int
-		pstSerialCh->pstTxChannel->pstUartHALHandle->Instance->CR1  |= ((0x1UL << (7U)));
+//		pstSerialCh->pstTxChannel->pstUartHALHandle->Instance->CR1  |= ((0x1UL << (7U)));
+		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
 	}
 
 	HAL_NVIC_EnableIRQ(pstSerialCh->uinIRQn);
@@ -293,7 +245,7 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 	enum BOOL boInterrruptOccurred = False;
 
 
-	errorflags = (srFlags & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE));
+	errorflags = (srFlags &(uint32_t)(USART_SR_ORE|USART_SR_NE|USART_SR_FE|USART_SR_PE));
 
 	//Has a comm error occured?
 	//if no
@@ -314,9 +266,9 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 	    	fvdTxInterruptHandler(pstSerialCh); //use this
 	    	boInterrruptOccurred = True;
 //	      UART_Transmit_IT(huart);
-	      return;
 	    }
 	    //if no
+	}
 	    	//save the error flags for later handling
 	    pstSerialCh->ulSerialErrorFlags = errorflags;
 
@@ -332,13 +284,12 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 
 
 			//if yes
-	    return;
 		//return
-	}
+
 	//if yes
 		//save the error flags later for handling
-	pstSerialCh->ulSerialErrorFlags = errorflags;
-	return;
+//	pstSerialCh->ulSerialErrorFlags = errorflags;
+//	return;
 
 
 }
@@ -353,31 +304,32 @@ void fvdRxInterruptHandler(stSERIAL_CHANNELTypeDef *pstSerialCh)
 	// Temporary variable to store char
 	char chTempCh;
 	// Static Interrupt Counter
-	static uint8_t suinRxIntCounter = 0;
+//	static uint8_t suinRxIntCounter = 0;
 	// Read value into the Rx
 	chTempCh = pstSerialCh->pstRxChannel->pstUartHALHandle->Instance->DR;
-	// Reset Red LED after an amount of attempts to indicate overflows are continuing
-	if (((suinRxIntCounter++) % RX_BUFFER_SIZE)==0)
-	{
-		HAL_GPIO_WritePin(GPIOD,RED_LED,GPIO_PIN_RESET);
-		suinRxIntCounter=0;
-	}
+//	// Reset Red LED after an amount of attempts to indicate overflows are continuing
+//	if (((suinRxIntCounter++) % RX_BUFFER_SIZE)==0)
+//	{
+//		HAL_GPIO_WritePin(GPIOD,RED_LED,GPIO_PIN_RESET);
+//		suinRxIntCounter=0;
+//	}
 
 	//Switch case routine that allows user to enter CTRLS/CTRLQ
-	switch (chTempCh)
-	{
+	switch (chTempCh){
 		// User requests Tx be stopped
 		case CTRLS:
-			CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
-//		  DISABLE_TXE_INT(pstSerialCh->pstTxChannel);
+//			pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1  &= ~(0x1UL << (7U));
+//			CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+		  DISABLE_TXE_INT(pstSerialCh->pstTxChannel);
 		  pstSerialCh->pstTxChannel->boTxUserCtrlS = True;
 		  return;
 
         //	User requests Tx be restarted
 	    case CTRLQ:
 		pstSerialCh->pstTxChannel->boTxUserCtrlS = False;
-		SET_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) ,USART_CR1_TXEIE );
-//		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
+//		(( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 )) |= ((0x1UL << (7U)));
+//		SET_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) ,USART_CR1_TXEIE );
+		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
 		return;
 	} // end of switch case
 
@@ -385,10 +337,9 @@ void fvdRxInterruptHandler(stSERIAL_CHANNELTypeDef *pstSerialCh)
 
 	//Checks if buffer is full
 
-	if (pstSerialCh->pstRxChannel->uinFree==0) //Buffer is full
-	{
+	if (pstSerialCh->pstRxChannel->uinFree==0){ //Buffer is full
 		pstSerialCh->ulSerialErrorCodes |= RX_BUFFER_FULL; //Throws away character
-		HAL_GPIO_WritePin(GPIOD,RED_LED,GPIO_PIN_SET); // Indicates RX buffer is full
+//		HAL_GPIO_WritePin(GPIOD,RED_LED,GPIO_PIN_SET); // Indicates RX buffer is full
 		return;
 	}
 
@@ -402,16 +353,16 @@ void fvdRxInterruptHandler(stSERIAL_CHANNELTypeDef *pstSerialCh)
 	pstSerialCh->pstRxChannel->uinFree--;
 
 	// Checks if upper threshold has been exceeded
-	if (pstSerialCh->pstRxChannel->uinUsed >= pstSerialCh->pstRxChannel->uinCtrlSThreshold)
-	{
+	if (pstSerialCh->pstRxChannel->uinUsed >= pstSerialCh->pstRxChannel->uinCtrlSThreshold){
 		pstSerialCh->pstRxChannel->chCtrlSCtrlQ = CTRLS; // Tx sends out CTRLS to stop char'sends
 
 		// Set a Hysteresis flag to indicate to Rx that interupt is in Hysteresis mode
 		// waiting for buffer to be emptied before resuming with CTRLQ
 		pstSerialCh->pstRxChannel->boHysteresisActive = True;
 		// Enables Tx interupts enable to allow transmitter to check and send CTRLS
-//		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
-		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
+//		 pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1  |= (0x1UL << (7U));
+//		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
 	} // end of RxHandler routine.
 }
 
@@ -425,7 +376,8 @@ void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
 			//txDR = CTRL S or CTRL Q
 		pstSerialCh->pstTxChannel->pstUartHALHandle->Instance->DR = pstSerialCh->pstRxChannel->chCtrlSCtrlQ;
 
-		//RESET CTRLS/Q loc = 0
+
+
 
 		//ORANGE LED on for CTRLS and Off for CTRLQ
 		if(pstSerialCh->pstRxChannel->chCtrlSCtrlQ == CTRLS){
@@ -435,6 +387,7 @@ void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
 			HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_RESET);
 		}
 
+		//RESET CTRLS/Q loc = 0
 		pstSerialCh->pstRxChannel->chCtrlSCtrlQ = 0;
 
 		//return
@@ -445,8 +398,8 @@ void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
 	if(pstSerialCh->pstTxChannel->uinUsed == 0){
 			//if yes
 				//disable Tx Int
-//		DISABLE_TXE_INT(pstSerialCh->pstTxChannel);
-		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+		DISABLE_TXE_INT(pstSerialCh->pstTxChannel);
+//		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
 		return;
 	}
 			//if no
@@ -454,12 +407,13 @@ void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
 	if(pstSerialCh->pstTxChannel->boTxUserCtrlS){
 					//if yes
 						//disable Tx Int
-		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+//		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+		DISABLE_TXE_INT(pstSerialCh->pstTxChannel);
 		return;
 	}
 					//if no
 						//TXDR <-- TBuf[tail];
-	pstSerialCh->pstTxChannel->pstUartHALHandle->Instance->DR = (uint8_t)((pstSerialCh->pstTxChannel->pchSerialBuffer[pstSerialCh->pstTxChannel->uinTail]) & 0x7FU);
+	pstSerialCh->pstTxChannel->pstUartHALHandle->Instance->DR = (uint8_t)((pstSerialCh->pstTxChannel->pchSerialBuffer[pstSerialCh->pstTxChannel->uinTail]) & 0x7FU);//anding with 127 does nothing.
 						//tail++
 						//check for wrap
 	pstSerialCh->pstTxChannel->uinTail = (pstSerialCh->pstTxChannel->uinTail + 1) % (pstSerialCh->pstTxChannel->uinBufSize);
@@ -468,7 +422,6 @@ void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
 						//used--
 	pstSerialCh->pstTxChannel->uinUsed--;
 						//return
-	return;
 }
 
 //returns true if successful and false if failed

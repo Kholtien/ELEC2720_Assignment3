@@ -25,29 +25,34 @@
 /*
 * Define specific error codes for this serial handler
 */
-# define INTERRUPT_GEN_ERROR ((0x01U )) // The interrupt generated an error
-# define RX_BUFFER_FULL ((0x01U ) << 1) // Rx buffer is full upon receive interrupt
+#define INTERRUPT_GEN_ERROR ((0x01U)) // The interrupt generated an error
+#define RX_BUFFER_FULL ((0x01U) << 1) // Rx buffer is full upon receive interrupt
+
 enum BOOL { False , True };
+
 // USART interrupt enable and disable macros
 // enable the RX interrupt
-# define ENABLE_RXNE_INT (RX_CHANNEL) SET_BIT( (RX_CHANNEL->pstUartHALHandle->Instance->CR1), USART_CR1_RXNEIE )
-// enable the TX interrupt
-# define ENABLE_TXE_INT ( TX_CHANNEL ) SET_BIT (( TX_CHANNEL -> pstUartHALHandle -> Instance -> CR1 ) ,USART_CR1_TXEIE )
+#define ENABLE_RXNE_INT(RX_CHANNEL) SET_BIT((RX_CHANNEL->pstUartHALHandle->Instance->CR1), USART_CR1_RXNEIE)
 // disable the RX interrupt
-# define DISABLE_RXNE_INT ( RX_CHANNEL ) CLEAR_BIT (( RX_CHANNEL -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_RXNEIE )
+#define DISABLE_RXNE_INT(RX_CHANNEL) CLEAR_BIT((RX_CHANNEL->pstUartHALHandle->Instance->CR1), USART_CR1_RXNEIE)
+// enable the TX interrupt
+#define ENABLE_TXE_INT(TX_CHANNEL) SET_BIT((TX_CHANNEL->pstUartHALHandle->Instance->CR1), USART_CR1_TXEIE)
 // disable the TX interrupt
-# define DISABLE_TXE_INT ( TX_CHANNEL ) CLEAR_BIT (( TX_CHANNEL -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE )
-# define CTRLS 0x13 // The Control S ascii character -- STOP transmission
-# define CTRLQ 0x11 // The Control Q ascii character -- START transmission
-# define NULL_CHAR '\0' // Used to indicate the end of strings .
-# define BLOCKING True // Blocking call to serial routine
-# define NON_BLOCKING False // Non - blocking call to serial routine
+#define DISABLE_TXE_INT(TX_CHANNEL) CLEAR_BIT((TX_CHANNEL->pstUartHALHandle->Instance->CR1), USART_CR1_TXEIE)
+
+#define CTRLS 0x13 // The Control S ascii character -- STOP transmission
+#define CTRLQ 0x11 // The Control Q ascii character -- START transmission
+#define NULL_CHAR "\0" // Used to indicate the end of strings .
+
+#define BLOCKING True // Blocking call to serial routine
+#define NON_BLOCKING False // Non - blocking call to serial routine
+
 // Set up the bits used to check for serial transmission errors
 // Actually defined in the auto generated HAL code
-# define UART_OVERRUN_ERR ((0x01U ) << 3) // The bit that indicates an overrun error .
-# define UART_NOISE_ERR ((0x01U ) << 2) // Noise glitch detected error .
-# define UART_FRAMING_ERR ((0x01U ) << 1) // Framing error .
-# define UART_PARITY_ERR ((0x01U ) << 0) // Parity error
+//# define UART_OVERRUN_ERR ((0 x01U ) << 3) // The bit that indicates an overrun error .
+//# define UART_NOISE_ERR ((0 x01U ) << 2) // Noise glitch detected error .
+//# define UART_FRAMING_ERR ((0 x01U ) << 1) // Framing error .
+//# define UART_PARITY_ERR ((0 x01U ) << 0) // Parity error
 
 
 
