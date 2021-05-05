@@ -107,7 +107,7 @@ stSERIAL_CHANNELTypeDef * pstCreateSerialChannel(UART_HandleTypeDef *pstHuart2, 
 void fvdEnableSerialChInterupts(stSERIAL_CHANNELTypeDef * pstSERIAL_CHANNEL); //done
 char fchGetChar(stSERIAL_CHANNELTypeDef *pstSerialCh, enum BOOL boBlocking);//done
 uint8_t fuinPutChar(stSERIAL_CHANNELTypeDef *pstSerialCh, char chChar, enum BOOL boBlocking);//done
-void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh);//TODO
+void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh);//done
 void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh);//done
 
 
@@ -117,6 +117,6 @@ uint16_t fuinRecievedChars(stSERIAL_CHANNELTypeDef *pstSerialCh);//done
 
 uint16_t fuinGetAllChars(stSERIAL_CHANNELTypeDef *pstSerialCh, char *pchString, uint16_t uinMaxStringSize);//done
 
-void fvdRxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh);//TODO
+void fvdRxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh);//done
 
 #endif /* INC_MY_SERIAL_H_ */

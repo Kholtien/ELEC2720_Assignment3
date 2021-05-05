@@ -3,7 +3,8 @@ my_serial.c:176:6:fvdEnableSerialChInterupts	16	static
 my_serial.c:189:6:fchGetChar	24	static
 my_serial.c:234:9:fuinPutChar	24	static
 my_serial.c:287:6:fvdSerialChannelISR	32	static
-my_serial.c:345:6:fvdTxInterruptHandler	16	static
-my_serial.c:402:11:fboPrintStr	32	static
-my_serial.c:427:10:fuinRecievedChars	16	static
-my_serial.c:433:10:fuinGetAllChars	40	static
+my_serial.c:351:6:fvdRxInterruptHandler	24	static
+my_serial.c:418:6:fvdTxInterruptHandler	16	static
+my_serial.c:475:11:fboPrintStr	32	static
+my_serial.c:500:10:fuinRecievedChars	16	static
+my_serial.c:506:10:fuinGetAllChars	40	static

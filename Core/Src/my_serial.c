@@ -289,7 +289,7 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 	//read ISR and CR1
 	uint32_t srFlags = READ_REG(pstSerialCh->pstRxChannel->pstUartHALHandle->Instance->SR);
 	uint32_t cr1its = READ_REG(pstSerialCh->pstRxChannel->pstUartHALHandle->Instance->CR1);
-	uint32_t errorflags = 0x00U;
+	uint32_t errorflags;
 	enum BOOL boInterrruptOccurred = False;
 
 
@@ -303,7 +303,7 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 			//if yes
 				//call Rx Int Handler function
 	    if (((srFlags & USART_SR_RXNE) != 0U) && ((cr1its & USART_CR1_RXNEIE) != 0U)){
-//			fvdRxInterruptHandler(pstSerialCh); //use this
+	    	fvdRxInterruptHandler(pstSerialCh); //use this
 			boInterrruptOccurred = True;
 	    }
 		//Check Tx Int Enabled and Tx Int
@@ -311,7 +311,7 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 	    {
 	    	//if yes
 	    	//call Tx Int Handler
-//	    	fvdTxInterrupthanler(pstSerialCh); //use this
+	    	fvdTxInterruptHandler(pstSerialCh); //use this
 	    	boInterrruptOccurred = True;
 //	      UART_Transmit_IT(huart);
 	      return;
@@ -324,22 +324,95 @@ void fvdSerialChannelISR(stSERIAL_CHANNELTypeDef * pstSerialCh)
 
 	    if(!boInterrruptOccurred){
 	    	//if no
+	    	//set error flag clear pending uart interrupt
 	    	pstSerialCh->ulSerialErrorCodes |= INTERRUPT_GEN_ERROR;
 	    	HAL_NVIC_ClearPendingIRQ(pstSerialCh->uinIRQn);
 	    }
 
 
-						//set error flag clear pending uart interrupt
-			//if yes
 
+			//if yes
+	    return;
 		//return
 	}
 	//if yes
 		//save the error flags later for handling
 	pstSerialCh->ulSerialErrorFlags = errorflags;
+	return;
 
 
+}
 
+/*Function for the Receive interrupt handler
+* Only entered if no errors and a valid receiver not empty
+* It is called from the interupt routine if the Rx interrupt is one of the interrupts
+* It handles CTRLS/CTRLQ if the Rx buffer is full and also if user enters CTRLS/CTRLQ
+*/
+void fvdRxInterruptHandler(stSERIAL_CHANNELTypeDef *pstSerialCh)
+{
+	// Temporary variable to store char
+	char chTempCh;
+	// Static Interrupt Counter
+	static uint8_t suinRxIntCounter = 0;
+	// Read value into the Rx
+	chTempCh = pstSerialCh->pstRxChannel->pstUartHALHandle->Instance->DR;
+	// Reset Red LED after an amount of attempts to indicate overflows are continuing
+	if (((suinRxIntCounter++) % RX_BUFFER_SIZE)==0)
+	{
+		HAL_GPIO_WritePin(GPIOD,RED_LED,GPIO_PIN_RESET);
+		suinRxIntCounter=0;
+	}
+
+	//Switch case routine that allows user to enter CTRLS/CTRLQ
+	switch (chTempCh)
+	{
+		// User requests Tx be stopped
+		case CTRLS:
+			CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+//		  DISABLE_TXE_INT(pstSerialCh->pstTxChannel);
+		  pstSerialCh->pstTxChannel->boTxUserCtrlS = True;
+		  return;
+
+        //	User requests Tx be restarted
+	    case CTRLQ:
+		pstSerialCh->pstTxChannel->boTxUserCtrlS = False;
+		SET_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) ,USART_CR1_TXEIE );
+//		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
+		return;
+	} // end of switch case
+
+	//Normal char processing, no CTRLS/CTRLQ
+
+	//Checks if buffer is full
+
+	if (pstSerialCh->pstRxChannel->uinFree==0) //Buffer is full
+	{
+		pstSerialCh->ulSerialErrorCodes |= RX_BUFFER_FULL; //Throws away character
+		HAL_GPIO_WritePin(GPIOD,RED_LED,GPIO_PIN_SET); // Indicates RX buffer is full
+		return;
+	}
+
+	// If space free in the buffer
+	//Puts the char in the buffer
+	pstSerialCh->pstRxChannel->pchSerialBuffer[pstSerialCh->pstRxChannel->uinHead] = chTempCh;
+	//Wraps the head
+	pstSerialCh->pstRxChannel->uinHead = (pstSerialCh->pstRxChannel->uinHead + 1) % (pstSerialCh->pstRxChannel->uinBufSize);
+	 //Increments used positions and decrements the free spaces
+	pstSerialCh->pstRxChannel->uinUsed++;
+	pstSerialCh->pstRxChannel->uinFree--;
+
+	// Checks if upper threshold has been exceeded
+	if (pstSerialCh->pstRxChannel->uinUsed >= pstSerialCh->pstRxChannel->uinCtrlSThreshold)
+	{
+		pstSerialCh->pstRxChannel->chCtrlSCtrlQ = CTRLS; // Tx sends out CTRLS to stop char'sends
+
+		// Set a Hysteresis flag to indicate to Rx that interupt is in Hysteresis mode
+		// waiting for buffer to be emptied before resuming with CTRLQ
+		pstSerialCh->pstRxChannel->boHysteresisActive = True;
+		// Enables Tx interupts enable to allow transmitter to check and send CTRLS
+//		ENABLE_TXE_INT(pstSerialCh->pstTxChannel);
+		CLEAR_BIT (( pstSerialCh->pstTxChannel -> pstUartHALHandle -> Instance -> CR1 ) , USART_CR1_TXEIE );
+	} // end of RxHandler routine.
 }
 
 void fvdTxInterruptHandler(stSERIAL_CHANNELTypeDef* pstSerialCh)
